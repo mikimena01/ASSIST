@@ -24,7 +24,11 @@ print(f"Device used: {device}")
 
     # Model name
 
-
+images = []
+files = ['CVMicheleMenabeni1309.pdf']
+for file in files:
+        print(f"Indexing now: {file}")
+        images.extend(convert_from_path(file))
     # Load model
 from transformers import AutoModel
 model_name = "vidore/colpali-v1.2"
