@@ -24,8 +24,7 @@ print(f"Device used: {device}")
 
     # Model name
 
-save_directory="/Users/michelemenabeni/PycharmProjects/ASSIST2/weights"
-print(os.listdir(save_directory))
+
     # Load model
 from transformers import AutoModel
 model_name = "vidore/colpali-v1.2"
@@ -34,16 +33,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Tenta di scaricare nuovamente il modello
 model = ColPali.from_pretrained(
-    save_directory,
+    model_name,
     trust_remote_code=True,
     torch_dtype=torch.bfloat16,
     device_map=None,
 ).eval()
 
-print(f"Modello caricato da: {save_directory}")
     # Load processor
-processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(save_directory, local_files_only=True))
-print(f"Processor caricato da: {save_directory}")
+processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name, local_files_only=True))
 if not isinstance(processor, BaseVisualRetrieverProcessor):
         raise ValueError("Processor should be a BaseVisualRetrieverProcessor")
 images = []
