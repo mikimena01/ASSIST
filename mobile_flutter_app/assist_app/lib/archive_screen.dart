@@ -79,10 +79,17 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Archivio Chat'),
+        backgroundColor: Color(0xFF00FFB2), // Bright green
+        title: Text(
+          'Chats Archive',
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 26,
+              color: Color.fromARGB(255, 12, 41, 88)),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: Icon(Icons.delete, color: Color.fromARGB(255, 12, 41, 88)),
             onPressed:
                 _selectedChats.contains(true) ? _deleteSelectedChats : null,
           ),
@@ -92,13 +99,21 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
         itemCount: _chats.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(_chatNames[index]),
+            titleAlignment: ListTileTitleAlignment.center,
+            title: Text(
+              _chatNames[index],
+              style: TextStyle(
+                  color: Color(0xFF00FFB2), fontWeight: FontWeight.bold),
+            ),
+            tileColor: Colors.blueGrey[400], // Dark background for list items
             onTap: () => _openChat(_chats[index]),
             trailing: Checkbox(
+              focusColor: Color(0xFF00FFB2),
               value: _selectedChats[index],
               onChanged: (bool? value) {
                 _toggleSelection(index);
               },
+              activeColor: Color(0xFF00FFB2), // Bright green for the checkbox
             ),
           );
         },
@@ -116,7 +131,9 @@ class ArchivedChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Archivio'),
+        backgroundColor: Color(0xFF00FFB2), // Bright green
+        title: Text('Chats Archive',
+            style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: ListView.builder(
         itemCount: messages.length,
@@ -130,7 +147,8 @@ class ArchivedChatScreen extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: message.isSentByMe ? Colors.blue : Colors.grey,
+                  color:
+                      message.isSentByMe ? Color(0xFF00FFB2) : Colors.grey[700],
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

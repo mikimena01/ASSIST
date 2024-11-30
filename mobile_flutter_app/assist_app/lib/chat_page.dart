@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'objects/message.dart';
+import 'package:http/http.dart' as http;
 
 class ChatScreen extends StatefulWidget {
   final String scanResult;
@@ -17,24 +18,53 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<ChatMessage> _messages = [];
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _messages.add(ChatMessage(text: widget.scanResult, isSentByMe: true));
-    widget.channel.stream.listen((data) {
-      setState(() {
-        _messages.add(ChatMessage(text: data, isSentByMe: false));
-      });
+    String response = "Welcome"; // Welcome message
+    setState(() {
+      _messages.add(ChatMessage(text: response, isSentByMe: false));
     });
   }
 
   @override
   void dispose() {
     widget.channel.sink.close();
+    _scrollController.dispose();
     super.dispose();
   }
 
+  // Modified fetchData function to directly return the response as String
+  Future<String> fetchData(String payload) async {
+    final String baseUrl = 'https://2185-34-126-175-194.ngrok-free.app';
+    final Map<String, String> queryParams = {
+      'param1': payload,
+    };
+
+    final Uri uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
+
+    try {
+      final http.Response response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data is Map<String, dynamic> && data.containsKey('message')) {
+          return data['message'];
+        } else {
+          return 'Invalid response';
+        }
+      } else {
+        return 'Request error';
+      }
+    } catch (e) {
+      return 'Request error';
+    }
+  }
+
+  // Function to send the message
   Future<void> _sendMessage() async {
     if (_controller.text.isEmpty) {
       return;
@@ -47,16 +77,26 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add(message);
+      _controller.clear();
     });
 
-    widget.channel.sink.add(
-      json.encode({
-        'type': 'chat_message',
-        'message': _controller.text,
-      }),
-    );
+    // Wait for the response from fetchData
+    String response = await fetchData(message.text);
 
-    _controller.clear();
+    setState(() {
+      _messages.add(ChatMessage(text: response, isSentByMe: false));
+    });
+
+    _scrollToBottom();
+  }
+
+  // Function for auto-scrolling to the last message
+  void _scrollToBottom() {
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
   }
 
   Future<void> _saveChat() async {
@@ -65,21 +105,24 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Nome della chat'),
+          backgroundColor: Colors.blueGrey[900], // Dialog with dark background
+          title: Text('Chat Name', style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: nameController,
-            decoration:
-                InputDecoration(hintText: "Inserisci il nome della chat"),
+            decoration: InputDecoration(
+              hintText: "Enter the chat name",
+              hintStyle: TextStyle(color: Colors.white),
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('ANNULLA'),
+              child: Text('CANCEL', style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('SALVA'),
+              child: Text('SAVE', style: TextStyle(color: Color(0xFF00FFB2))),
               onPressed: () {
                 Navigator.of(context).pop(nameController.text);
               },
@@ -104,10 +147,16 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat'),
+        backgroundColor: Color(0xFF00FFB2), // Bright green
+        title: Text(
+          'Chat',
+          style: TextStyle(
+              color: Color.fromARGB(255, 12, 41, 88),
+              fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: Icon(Icons.save, color: Color.fromARGB(255, 12, 41, 88)),
             onPressed: _saveChat,
           ),
         ],
@@ -116,6 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
@@ -127,7 +177,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: EdgeInsets.all(10),
                     margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     decoration: BoxDecoration(
-                      color: message.isSentByMe ? Colors.blue : Colors.grey,
+                      color: message.isSentByMe
+                          ? Color.fromARGB(
+                              255, 53, 9, 129) // Bright green for sent messages
+                          : Color.fromARGB(255, 97, 97,
+                              97), // Dark grey for received messages
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -146,12 +200,26 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration:
-                        InputDecoration(hintText: 'Invia un messaggio...'),
+                    style: TextStyle(
+                        color: Colors.white), // Set the text color to white
+                    decoration: InputDecoration(
+                      hintText: 'Send a message...',
+                      hintStyle: TextStyle(
+                          color: Colors.white), // Set the hint color to white
+                      filled: true,
+                      fillColor: Colors
+                          .blueGrey[800], // Background color of the text field
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(Icons.send,
+                      color: Color(
+                          0xFF00FFB2)), // Bright green for the send button
                   onPressed: _sendMessage,
                 ),
               ],

@@ -5,13 +5,13 @@ class ChatMessage {
   ChatMessage({required this.text, required this.isSentByMe});
 
   Map<String, dynamic> toJson() => {
-        'text': text,
+        'message': text,
         'isSentByMe': isSentByMe,
       };
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      text: json['text'],
+      text: json['message'],
       isSentByMe: json['isSentByMe'],
     );
   }
