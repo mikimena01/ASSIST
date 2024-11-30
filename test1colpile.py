@@ -40,7 +40,7 @@ model = ColPali.from_pretrained(
 ).eval()
 
     # Load processor
-processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name, local_files_only=True))
+processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name))
 if not isinstance(processor, BaseVisualRetrieverProcessor):
         raise ValueError("Processor should be a BaseVisualRetrieverProcessor")
 images = []
