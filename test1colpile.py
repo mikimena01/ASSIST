@@ -63,5 +63,26 @@ for batch_query in dataloader:
 
     # Run scoring
 scores = processor.score(qs, document_embeddings).cpu().numpy()
-idx_top_1 = scores.argmax(axis=1)
-print("Indices of the top-1 retrieved documents for each query:", idx_top_1)
+scores = processor.score(qs, document_embeddings).cpu().numpy()
+print("Scores:", scores)
+print("Indices of the top-1 retrieved documents for each query:", scores.argmax(axis=1))
+
+generation_config = {
+  "temperature": 0.0,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 1024,
+  "response_mime_type": "text/plain",
+}
+import google.generativeai as genai
+
+genai.configure(api_key='AIzaSyBLGHniJE-TUoRHPhAB1RoC7suLfmQff9Q')
+
+model = genai.GenerativeModel(model_name="gemini-1.5-flash" , generation_config=generation_config)
+best_indexes = scores.argmax(axis=1)
+count=0
+for x in best_indexes:
+      print(images[x])
+      response = model.generate_content([queries[count], images[x]])
+      count+=1
+      print(response.text)
