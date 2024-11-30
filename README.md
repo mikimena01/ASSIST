@@ -1,1 +1,2 @@
 # ASSIST
+![Logo](logo.png)
