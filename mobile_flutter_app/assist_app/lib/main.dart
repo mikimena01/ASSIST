@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'chat_page.dart';
+import 'archive_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,7 +33,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _channel = WebSocketChannel.connect(Uri.parse('ws://...'));
+    _channel = WebSocketChannel.connect(
+      Uri.parse('wss://your.websocket.url'),
+    );
   }
 
   @override
@@ -41,17 +44,19 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  // Funzione di validazione del Codice Fiscale
   bool validateCodiceFiscale(String codice) {
     final RegExp regex =
         RegExp(r'^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$');
     return regex.hasMatch(codice);
   }
 
+  // Funzione di scansione del codice a barre
   Future<void> scanBarcode() async {
     String barcodeScanRes = 'In attesa di scansione...';
 
     setState(() {
-      _scanResult = barcodeScanRes;
+      _scanResult = barcodeScanRes; // Mostra il messaggio di attesa
     });
 
     while (true) {
@@ -66,9 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
       if (validateCodiceFiscale(barcodeScanRes)) {
         setState(() {
-          _scanResult = barcodeScanRes;
+          _scanResult = barcodeScanRes; // Mostra il codice fiscale valido
         });
-        break;
+        break; // Esci dal ciclo quando trovi un codice fiscale valido
       } else {
         setState(() {
           _scanResult = 'Codice fiscale non valido, riprova...';
@@ -85,12 +90,21 @@ class _MyHomePageState extends State<MyHomePage> {
         context,
         MaterialPageRoute(
           builder: (context) => ChatScreen(
+            scanResult: _scanResult,
             channel: _channel,
-            initialMessage: _scanResult,
           ),
         ),
       );
     }
+  }
+
+  void navigateToArchive() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArchiveScreen(),
+      ),
+    );
   }
 
   @override
@@ -98,6 +112,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Barcode Scanner'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.archive),
+            onPressed: navigateToArchive,
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -110,15 +130,13 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_scanResult',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: scanBarcode,
               child: Text('Scansiona Codice a Barre'),
             ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: navigateToChat,
-              child: Text('Invia Risultato e Vai alla Chat'),
+              child: Text('Vai alla Chat'),
             ),
           ],
         ),

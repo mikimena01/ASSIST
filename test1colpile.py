@@ -32,8 +32,8 @@ for file in files:
     # Load model
 from transformers import AutoModel
 model_name = "vidore/colpali-v1.2"
-transformers_logging.set_verbosity_debug()
-logging.basicConfig(level=logging.DEBUG)
+#transformers_logging.set_verbosity_debug()
+#logging.basicConfig(level=logging.DEBUG)
 
 # Tenta di scaricare nuovamente il modello
 model = ColPali.from_pretrained(
@@ -47,9 +47,8 @@ model = ColPali.from_pretrained(
 processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name))
 if not isinstance(processor, BaseVisualRetrieverProcessor):
         raise ValueError("Processor should be a BaseVisualRetrieverProcessor")
-images = []
 queries = ["chi è michele menabeni?",'di che colore sono i capelli di Michele Menabeni?']
-with open("/Users/michelemenabeni/PycharmProjects/ASSIST2/embeddings_prova.pkl", 'rb') as f:
+with open("C:/Users/rikyt/Desktop/Github_Uploads/ASSIST/embeddings_prova.pkl", 'rb') as f:
         document_embeddings = pickle.load(f)
 dataloader = DataLoader(
         queries,
@@ -85,8 +84,11 @@ genai.configure(api_key='AIzaSyBLGHniJE-TUoRHPhAB1RoC7suLfmQff9Q')
 model = genai.GenerativeModel(model_name="gemini-1.5-flash" , generation_config=generation_config)
 best_indexes = scores.argmax(axis=1)
 count=0
+print(best_indexes)
+print(len(images))
 for x in best_indexes:
-      print(images[x])
-      response = model.generate_content([queries[count], images[x]])
-      count+=1
-      print(response.text)
+    print()
+    print(images[x])
+    response = model.generate_content([queries[count], images[x]])
+    count+=1
+    print(response.text)
