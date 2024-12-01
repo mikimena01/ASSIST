@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'chat_page.dart';
+import 'archive_screen.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -11,9 +14,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Barcode Scanner',
+      title: 'ASSIST',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.greenAccent, // Button color
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        ),
+        scaffoldBackgroundColor:
+            Color.fromARGB(255, 12, 41, 88), // Dark background (Dark Blue)
       ),
       home: MyHomePage(),
     );
@@ -26,13 +35,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _scanResult = 'Nessun risultato';
+  String payload = "white blood cells of Maria Bianchi";
+  String _scanResult = 'No result';
   late WebSocketChannel _channel;
 
   @override
   void initState() {
     super.initState();
-    _channel = WebSocketChannel.connect(Uri.parse('ws://...'));
+    _channel = WebSocketChannel.connect(
+      Uri.parse('wss://your.websocket.url'),
+    );
   }
 
   @override
@@ -41,14 +53,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
-  bool validateCodiceFiscale(String codice) {
+  bool validateTaxCode(String codice) {
     final RegExp regex =
         RegExp(r'^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$');
     return regex.hasMatch(codice);
   }
 
   Future<void> scanBarcode() async {
-    String barcodeScanRes = 'In attesa di scansione...';
+    String barcodeScanRes = 'Waiting for scan...';
 
     setState(() {
       _scanResult = barcodeScanRes;
@@ -57,39 +69,70 @@ class _MyHomePageState extends State<MyHomePage> {
     while (true) {
       try {
         barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-            '#ff6666', 'Annulla', true, ScanMode.BARCODE);
+            '#FF00FF', 'Cancel', true, ScanMode.BARCODE);
       } on Exception {
-        barcodeScanRes = 'Errore nella scansione del codice a barre';
+        barcodeScanRes = 'Barcode scan error';
       }
 
       if (!mounted) return;
 
-      if (validateCodiceFiscale(barcodeScanRes)) {
+      if (validateTaxCode(barcodeScanRes)) {
         setState(() {
           _scanResult = barcodeScanRes;
         });
         break;
       } else {
         setState(() {
-          _scanResult = 'Codice fiscale non valido, riprova...';
-          print('Codice fiscale non valido, riprova...');
+          _scanResult = 'Invalid tax code, please try again...';
+          print('Invalid tax code, please try again...');
         });
       }
     }
   }
 
   void navigateToChat() {
-    if (_scanResult != 'Nessun risultato' &&
-        _scanResult != 'Codice fiscale non valido, riprova...') {
+    if (_scanResult != 'No result' &&
+        _scanResult != 'Invalid tax code, please try again...') {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ChatScreen(
+            scanResult: _scanResult,
             channel: _channel,
-            initialMessage: _scanResult,
           ),
         ),
       );
+    }
+  }
+
+  void navigateToArchive() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArchiveScreen(),
+      ),
+    );
+  }
+
+  Future<void> fetchData(String payload) async {
+    final String baseUrl = 'https://725b-34-126-175-194.ngrok-free.app';
+    final Map<String, String> queryParams = {
+      'param1': payload,
+    };
+
+    final Uri uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
+
+    try {
+      final http.Response response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print('Response: $data');
+      } else {
+        print('Request error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Request error: $e');
     }
   }
 
@@ -97,30 +140,77 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Barcode Scanner'),
+        backgroundColor: Color(0xFF00FFB2), // Dark blue for the bar
+        title: Text('ASSIST',
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                color: Color.fromARGB(255, 12, 41, 88))),
+        actions: [
+          IconButton(
+            iconSize: 30,
+            icon: Icon(Icons.archive, color: Color.fromARGB(255, 12, 41, 88)),
+            onPressed: navigateToArchive,
+          ),
+        ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Risultato della scansione:',
-            ),
-            Text(
-              '$_scanResult',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: scanBarcode,
-              child: Text('Scansiona Codice a Barre'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: navigateToChat,
-              child: Text('Invia Risultato e Vai alla Chat'),
-            ),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              // Title
+              Text(
+                'Scan result:',
+                style: TextStyle(
+                  color: Color(0xFF00FFB2), // Light purple for the title
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 20),
+              // Scan result
+              Text(
+                '$_scanResult',
+                style: TextStyle(
+                  color: Color(0xFF00FFB2), // Bright green for result
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 40),
+              // Button to scan health card
+              ElevatedButton(
+                onPressed: scanBarcode,
+                child: Text('Scan Health Card',
+                    style: TextStyle(color: Color.fromARGB(255, 12, 41, 88))),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF00FFB2), // Bright green
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                  elevation: 5, // Button shadow
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+              ),
+              SizedBox(height: 40),
+              // Button to go to chat
+              ElevatedButton(
+                onPressed: navigateToChat,
+                child: Text('Start Chat',
+                    style: TextStyle(color: Color.fromARGB(255, 12, 41, 88))),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF00FFB2), // Dark blue
+                  padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
