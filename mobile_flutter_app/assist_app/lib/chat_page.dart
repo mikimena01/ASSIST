@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Modified fetchData function to directly return the response as String
   Future<String> fetchData(String payload) async {
-    final String baseUrl = 'https://2185-34-126-175-194.ngrok-free.app';
+    final String baseUrl = 'https://bb73-34-125-104-108.ngrok-free.app';
     final Map<String, String> queryParams = {
       'param1': payload,
     };
@@ -57,10 +57,10 @@ class _ChatScreenState extends State<ChatScreen> {
           return 'Invalid response';
         }
       } else {
-        return 'Request error';
+        return 'Request error 1';
       }
     } catch (e) {
-      return 'Request error';
+      return 'Request error 2';
     }
   }
 
@@ -79,6 +79,8 @@ class _ChatScreenState extends State<ChatScreen> {
       _messages.add(message);
       _controller.clear();
     });
+
+    _scrollToBottom();
 
     // Wait for the response from fetchData
     String response = await fetchData(message.text);
@@ -108,6 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
           backgroundColor: Colors.blueGrey[900], // Dialog with dark background
           title: Text('Chat Name', style: TextStyle(color: Colors.white)),
           content: TextField(
+            style: TextStyle(color: Colors.white),
             controller: nameController,
             decoration: InputDecoration(
               hintText: "Enter the chat name",
