@@ -24,7 +24,7 @@ The Automated Support System for Integrated Smart Triage is designed to provide 
 4. **Save and Archive**: Save and archive all chat sessions for later review and consultation.
 
 ## Usage
-1. Run notebook from the start, substituiting your API keys in the first cell.
+1. Run notebook from the start, using a CUDA enabled GPU with at least 10 GB of Memory and substituiting your API keys in the first cell.
 2. Open the flutter project and navigate to chat_page.dart at line 41.
 3. Substitute the generated link by Fast API inside the variable "baseUrl".
 4. Run "flutter run" command on your project terminal and the app will display on your mobile device in debug mode.
