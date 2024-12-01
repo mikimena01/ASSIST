@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Modified fetchData function to directly return the response as String
   Future<String> fetchData(String payload) async {
-    final String baseUrl = 'https://bb73-34-125-104-108.ngrok-free.app';
+    final String baseUrl = 'https://247f-34-125-31-114.ngrok-free.app/';
     final Map<String, String> queryParams = {
       'param1': payload,
     };

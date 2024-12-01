@@ -160,7 +160,8 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Title
+              Image.asset('assets/images/app_logo.png', scale: 3),
+              SizedBox(height: 30),
               Text(
                 'Scan result:',
                 style: TextStyle(
