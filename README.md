@@ -1,6 +1,12 @@
 ![Logo](logo.png)
 
 <p align="center">
-  <h2 style="display:inline">A</h2>utomated <h2 style="display:inline">S</h2>upport <h2 style="display:inline">S</h2>ystem for <h2 style="display:inline">I</h2>ntegrated <h2 style="display:inline">S</h2>mart <h2 style="display:inline">T</h2>riage
+  <span style="font-size:2em; font-weight:bold;">A</span>utomated 
+  <span style="font-size:2em; font-weight:bold;">S</span>upport 
+  <span style="font-size:2em; font-weight:bold;">S</span>ystem for 
+  <span style="font-size:2em; font-weight:bold;">I</span>ntegrated 
+  <span style="font-size:2em; font-weight:bold;">S</span>mart 
+  <span style="font-size:2em; font-weight:bold;">T</span>riage
 </p>
+
 
