@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'chat_page.dart';
 import 'archive_screen.dart';
@@ -67,13 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     while (true) {
-      try {
-        barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-            '#FF00FF', 'Cancel', true, ScanMode.BARCODE);
-      } on Exception {
-        barcodeScanRes = 'Barcode scan error';
-      }
-
       if (!mounted) return;
 
       if (validateTaxCode(barcodeScanRes)) {
