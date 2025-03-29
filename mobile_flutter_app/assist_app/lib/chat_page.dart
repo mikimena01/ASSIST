@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:assist_app/archive_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -19,6 +20,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
+  String _retrievedUrl = "";
 
   @override
   void initState() {
@@ -26,6 +28,14 @@ class _ChatScreenState extends State<ChatScreen> {
     String response = "Welcome"; // Welcome message
     setState(() {
       _messages.add(ChatMessage(text: response, isSentByMe: false));
+    });
+    _loadUrl();
+  }
+
+  Future<void> _loadUrl() async {
+    await GlobalSettings.loadGlobalUrl();
+    setState(() {
+      _retrievedUrl = GlobalSettings.globalUrl;
     });
   }
 
@@ -38,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // Modified fetchData function to directly return the response as String
   Future<String> fetchData(String payload) async {
-    final String baseUrl = 'https://247f-34-125-31-114.ngrok-free.app/';
+    final String baseUrl = _retrievedUrl;
     final Map<String, String> queryParams = {
       'param1': payload,
     };

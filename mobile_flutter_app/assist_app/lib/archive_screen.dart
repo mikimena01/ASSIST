@@ -3,76 +3,47 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'objects/message.dart';
 
+class GlobalSettings {
+  static String globalUrl = "";
+
+  static Future<void> setGlobalUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('global_url', url);
+    globalUrl = url;
+  }
+
+  static Future<void> loadGlobalUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    globalUrl = prefs.getString('global_url') ?? "";
+  }
+}
+
 class ArchiveScreen extends StatefulWidget {
   @override
   _ArchiveScreenState createState() => _ArchiveScreenState();
 }
 
 class _ArchiveScreenState extends State<ArchiveScreen> {
-  List<List<ChatMessage>> _chats = [];
-  List<String> _chatNames = [];
-  List<bool> _selectedChats = [];
+  TextEditingController _urlController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadChats();
+    _loadSavedUrl();
   }
 
-  Future<void> _loadChats() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> chats = prefs.getStringList('chats') ?? [];
-    List<String> chatNames = prefs.getStringList('chatNames') ?? [];
+  Future<void> _loadSavedUrl() async {
+    await GlobalSettings.loadGlobalUrl();
     setState(() {
-      _chats = chats
-          .map((chat) => (json.decode(chat) as List)
-              .map((message) => ChatMessage.fromJson(message))
-              .toList())
-          .toList();
-      _chatNames = chatNames;
-      _selectedChats = List<bool>.filled(_chats.length, false);
+      _urlController.text = GlobalSettings.globalUrl;
     });
   }
 
-  void _openChat(List<ChatMessage> messages) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ArchivedChatScreen(messages: messages),
-      ),
+  Future<void> _saveUrl() async {
+    await GlobalSettings.setGlobalUrl(_urlController.text);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("URL salvato con successo!")),
     );
-  }
-
-  void _toggleSelection(int index) {
-    setState(() {
-      _selectedChats[index] = !_selectedChats[index];
-    });
-  }
-
-  Future<void> _deleteSelectedChats() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> chats = prefs.getStringList('chats') ?? [];
-    List<String> chatNames = prefs.getStringList('chatNames') ?? [];
-
-    List<int> indicesToRemove = [];
-    for (int i = 0; i < _selectedChats.length; i++) {
-      if (_selectedChats[i]) {
-        indicesToRemove.add(i);
-      }
-    }
-
-    for (int i = indicesToRemove.length - 1; i >= 0; i--) {
-      int index = indicesToRemove[i];
-      _chats.removeAt(index);
-      chatNames.removeAt(index);
-      chats.removeAt(index);
-    }
-
-    await prefs.setStringList('chats', chats);
-    await prefs.setStringList('chatNames', chatNames);
-    setState(() {
-      _selectedChats = List<bool>.filled(_chats.length, false);
-    });
   }
 
   @override
@@ -81,42 +52,36 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFF00FFB2), // Bright green
         title: Text(
-          'Chats Archive',
+          'Settings',
           style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 26,
               color: Color.fromARGB(255, 12, 41, 88)),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete, color: Color.fromARGB(255, 12, 41, 88)),
-            onPressed:
-                _selectedChats.contains(true) ? _deleteSelectedChats : null,
-          ),
-        ],
       ),
-      body: ListView.builder(
-        itemCount: _chats.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            titleAlignment: ListTileTitleAlignment.center,
-            title: Text(
-              _chatNames[index],
-              style: TextStyle(
-                  color: Color(0xFF00FFB2), fontWeight: FontWeight.bold),
-            ),
-            tileColor: Colors.blueGrey[400], // Dark background for list items
-            onTap: () => _openChat(_chats[index]),
-            trailing: Checkbox(
-              focusColor: Color(0xFF00FFB2),
-              value: _selectedChats[index],
-              onChanged: (bool? value) {
-                _toggleSelection(index);
-              },
-              activeColor: Color(0xFF00FFB2), // Bright green for the checkbox
-            ),
-          );
-        },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              ListTile(
+                title: Text("Url"),
+              ),
+              TextField(
+                controller: _urlController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "Inserisci l'URL",
+                ),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _saveUrl,
+                child: Text("Salva"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
