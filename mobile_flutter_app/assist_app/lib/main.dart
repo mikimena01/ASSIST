@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
       backgroundColor: Color.fromARGB(255, 12, 17, 24),
       appBar: AppBar(
         backgroundColor:
-            Color.fromRGBO(255, 153, 255, 1), // Dark blue for the bar
+            Color.fromRGBO(255, 189, 89, 1), // Dark blue for the bar
         title: Text('MENTHOR',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             iconSize: 30,
-            icon: Icon(Icons.settings, color: Color.fromRGBO(255, 153, 255, 1)),
+            icon: Icon(Icons.settings, color: Color.fromARGB(255, 12, 17, 24)),
             onPressed: navigateToArchive,
           ),
         ],

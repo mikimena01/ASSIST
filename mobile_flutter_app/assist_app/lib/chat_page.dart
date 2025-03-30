@@ -135,7 +135,8 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
             TextButton(
-              child: Text('SAVE', style: TextStyle(color: Color(0xFF00FFB2))),
+              child: Text('SAVE',
+                  style: TextStyle(color: Color.fromRGBO(255, 189, 89, 1))),
               onPressed: () {
                 Navigator.of(context).pop(nameController.text);
               },
@@ -159,8 +160,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 12, 17, 24),
       appBar: AppBar(
-        backgroundColor: Color(0xFF00FFB2), // Bright green
+        backgroundColor: Color.fromRGBO(255, 189, 89, 1), // Bright green
         title: Text(
           'Chat',
           style: TextStyle(
@@ -168,10 +170,14 @@ class _ChatScreenState extends State<ChatScreen> {
               fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.save, color: Color.fromARGB(255, 12, 41, 88)),
-            onPressed: _saveChat,
-          ),
+          Text("Software Engineer",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 12, 41, 88))),
+          SizedBox(
+            width: 20,
+          )
         ],
       ),
       body: Column(
@@ -191,15 +197,17 @@ class _ChatScreenState extends State<ChatScreen> {
                     margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     decoration: BoxDecoration(
                       color: message.isSentByMe
-                          ? Color.fromARGB(
-                              255, 53, 9, 129) // Bright green for sent messages
+                          ? Color.fromRGBO(255, 153, 255,
+                              1) // Bright green for sent messages
                           : Color.fromARGB(255, 97, 97,
                               97), // Dark grey for received messages
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       message.text,
-                      style: TextStyle(color: Colors.white),
+                      style: message.isSentByMe
+                          ? TextStyle(color: Colors.black)
+                          : TextStyle(color: Colors.white),
                     ),
                   ),
                 );
@@ -231,8 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 IconButton(
                   icon: Icon(Icons.send,
-                      color: Color(
-                          0xFF00FFB2)), // Bright green for the send button
+                      color: Color.fromRGBO(255, 153, 255,
+                          1)), // Bright green for the send button
                   onPressed: _sendMessage,
                 ),
               ],
